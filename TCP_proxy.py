@@ -77,6 +77,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
 def hexdump(src, length=16):
     result = []
     digits = 4 if isinstance(src, unicode) else 2
+
     for i in range(0, len(src), length):
         s = src[i:i+length]
         hexa = b' '.join(["%0*X" % (digits, ord(x)) for x in s])
