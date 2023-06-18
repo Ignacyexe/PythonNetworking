@@ -1,3 +1,4 @@
+# Let's say this proxy server is kinda finished, I'll come back to it later with better experience
 import sys
 import socket
 import threading
@@ -38,7 +39,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
     # collecting data from host (such as ftp banners) is needed
     if receive_first:
         remote_buffer = receive_from(remote_socket)
-        hexdump(remote_buffer)
+        hexdump(remote_buffer, 0xdeadb000)
 
         # sending data to response handling procedure
         remote_buffer = response_handler(remote_buffer)
@@ -47,12 +48,12 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
         if len(remote_buffer):
             print(f"[<==] Sending {len(remote_buffer)} to localhost.")
             client_socket.send(remote_buffer)
-    # also this line of code may have indentation problems
+        # also this line of code may have indentation problems
         while True:
             local_buffer = receive_from(client_socket)
             if len(local_buffer):
                 print(f"[==>] Received {len(local_buffer)} bytes from localhost.")
-                hexdump(local_buffer)
+                hexdump(local_buffer, 0xdeadb000)
 
                 local_buffer = request_handler(local_buffer)
 
@@ -63,7 +64,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
 
                 if len(remote_buffer):
                     print(f"[<==] Received {len(remote_buffer)} bytes from remote host")
-                    hexdump(remote_buffer)
+                    hexdump(remote_buffer, 0xdeadb000)
 
                     remote_buffer = response_handler(remote_buffer)
                     print("[<==] Sent to localhost.")
@@ -74,16 +75,46 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
                 break
 
 
-def hexdump(src, length=16):
-    result = []
-    digits = 4 if isinstance(src, unicode) else 2
-    for i in range(0, len(src), length):
-        s = src[i:i+length]
-        hexa = b' '.join(["%0*X" % (digits, ord(x)) for x in s])
-        text = b''.join([x if 0x20 <= ord(x) < 0x7F else b'.' for x in s])
-        result.append(b"%04X %-*s %s" % (i, length*(digits + 1), hexa, text))
+# this version is still better than that commented below
+class hexdump:
+    def __init__(self, buf, off=0):
+        self.buf = buf
+        self.off = off
 
-    print(b'\n'.join(result))
+    def __iter__(self):
+        last_bs, last_line = None, None
+        for i in range(0, len(self.buf), 16):
+            bs = bytearray(self.buf[i: i + 16])
+            line = "{:08x}  {:23}  {:23}  |{:16}|".format(
+                self.off + i,
+                " ".join(("{:02x}".format(x) for x in bs[:8])),
+                " ".join(("{:02x}".format(x) for x in bs[8:])),
+                "".join((chr(x) if 32 <= x < 127 else "." for x in bs)),
+            )
+            if bs == last_bs:
+                line = "*"
+            if bs != last_bs or line != last_line:
+                yield line
+            last_bs, last_line = bs, line
+        yield "{:08x}".format(self.off + len(self.buf))
+
+    def __str__(self):
+        return "\n".join(self)
+
+    def __repr__(self):
+        return "\n".join(self)
+
+
+# def hexdump(src, length=16):
+#     result = []
+#     digits = 4 if isinstance(src, unicode) else 2
+#     for i in range(0, len(src), length):
+#         s = src[i:i+length]
+#         hexa = b' '.join(["%0*X" % (digits, ord(x)) for x in s])
+#         text = b''.join([x if 0x20 <= ord(x) < 0x7F else b'.' for x in s])
+#         result.append(b"%04X %-*s %s" % (i, length*(digits + 1), hexa, text))
+#
+#     print(b'\n'.join(result))
 
 
 def receive_from(connection):
@@ -144,5 +175,6 @@ def main():
 
     # print(type(local_host), type(local_port), type(remote_host), type(remote_port), type(receive_first))
     # print(local_host, local_port, remote_host, remote_port, receive_first)
+
 
 main()
