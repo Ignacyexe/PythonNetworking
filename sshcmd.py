@@ -15,4 +15,4 @@ def ssh_command(ip, user, passwd, command):
     return
 
 
-ssh_command('127.0.0.1', 'user', 'user', 'id')
+ssh_command('127.0.0.1', 'user', 'passwd', 'id')
