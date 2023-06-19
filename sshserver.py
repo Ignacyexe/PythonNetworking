@@ -1,3 +1,6 @@
+# it's just for experimenting with paramiko
+# right now this code is getting older because more and more Windows machines have ssh
+
 import socket
 import sys
 import threading
