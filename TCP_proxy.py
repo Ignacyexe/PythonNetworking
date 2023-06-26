@@ -20,7 +20,7 @@ def server_loop(
         print(f"[!!] Failed attempt to listen on port {local_host, local_port}")
         print("Try to find another socket, or gain proper privileges.")
         sys.exit(0)
-    finally:  # I added this finally, for aesthetic reasons, if it causes problems, I will delete that
+    finally:  # I added this finally, for aesthetic reasons, if it causes problems, I'll delete that
         print(f"[*] Listening on port {local_host, local_port}")
         server.listen(5)
         while True:
@@ -133,10 +133,12 @@ def receive_from(connection):
 
 
 def request_handler(buffer):
+    # perform packet modifications (e.g. fuzzing, testing for auth issues, finding creds, etc.)
     return buffer
 
 
 def response_handler(buffer):
+    # perform packet modifications (e.g. fuzzing, testing for auth issues, finding creds, etc.)
     return buffer
 
 

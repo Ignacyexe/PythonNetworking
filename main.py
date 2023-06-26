@@ -10,7 +10,7 @@ def encryptMessage(message, key, nonce):
 
 
 def writeData(data):
-    with open("out.txt", "w") as f:
+    with open("README.md", "w") as f:
         f.write(data)
 
 
