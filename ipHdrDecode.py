@@ -3,7 +3,25 @@ import socket
 import struct
 from ctypes import *
 
-host = "192.168.172.210"
+import threading
+import time
+from netaddr import IPNetwork, IPAddress
+
+host = "10.20.30.110"
+subnet = "10.20.30.0/24"
+# magic string, for which we are going to check ICMP responses
+magic_message = b"SCANNING"
+
+
+def udp_sender(subnet, magic_message):
+    time.sleep(5)
+    sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    for ip in IPNetwork(subnet):
+        try:
+            sender.sendto(magic_message, ("%s" % ip, 65212))
+        except:
+            pass
 
 
 class IP(Structure):
@@ -67,12 +85,16 @@ sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 if os.name == "nt":
     sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
 
+# starting to send packets
+t = threading.Thread(target=udp_sender, args=(subnet, magic_message))
+t.start()
+
 try:
     while True:
         raw_buffer = sniffer.recvfrom(65565)[0]
         # creating ip header from first 20 bytes from buffer
         ip_header = IP(raw_buffer[0:20])
-
+        # if you want to do host discovery comment this printline
         print(f"Protocol: {ip_header.protocol} {ip_header.src_address} -> {ip_header.dst_address}")
 
         # decoding ICMP
@@ -83,9 +105,16 @@ try:
 
             # creating ICMP structure
             icmp_header = ICMP(buf)
-
+            # if you want to do only host discovery comment this printline
             print(f"ICMP -> Type: {icmp_header.type} Code: {icmp_header.code}")
 
+            # checking if type and code is type 3
+            if icmp_header.code == 3 and icmp_header.type == 3:
+                # making sure the host is in the subnet
+                if IPAddress(ip_header.src_address) in IPNetwork(subnet):
+                    # checking if there is a magic message
+                    if raw_buffer[len(raw_buffer) - len(magic_message):] == magic_message:
+                        print(f"Host: {ip_header.src_address}")
 
 except KeyboardInterrupt:
     if os.name == "nt":
