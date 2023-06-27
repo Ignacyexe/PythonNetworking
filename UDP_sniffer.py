@@ -1,6 +1,7 @@
 import socket
 import os
 
+# machine ip is needed, because bind() function only assigns localhost ip
 host = "192.168.172.210"
 
 # checking which os system does target use and assigning proper protocols to it
