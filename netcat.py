@@ -99,7 +99,7 @@ def client_handler(client_socket):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Netcat made by Amor Fati',
+        description='Netcat made by Ignacy.exe',
         formatter_class=argparse.RawTextHelpFormatter,
         epilog=textwrap.dedent('''Examples:
 

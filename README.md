@@ -1,0 +1,1 @@
+The following code was very much inspired if not written down from the "Black Hat Python" book. I used this book to learn python in a more practical light, as well as my networking skills. As time goes on and my skills grow, this code will become more and more different from what is in the book, and will serve towards my goals. 
